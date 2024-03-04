@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <form action="/sonuclar" method="post" id="myForm">
+        <!-- Kullanıcıdan metin girişi almak için input kutusu -->
+        <label for="inputText">Metin Girişi:</label>
+        <input type="text" id="inputText" name="inputText" required>
+
+        <!-- Formu göndermek için bir buton -->
+        <button type="submit">Gönder</button>
+    </form>
+    <h1>{{sonuctext}}</h1>
+    <!-- Kullanıcının girdiği metni göstermek için bir kutu -->
+    <div id="resultBox"></div>
+    <ul>
+    {% for link in pdf_links %}
+    <li> <a href = "{{ link}}"> linkler </a></li>
+    {%endfor%}
+    </ul>
+    
+    <script>
+ 
+    </script>
+</body>
+</html>
+<!--4 mart 6:49-->
