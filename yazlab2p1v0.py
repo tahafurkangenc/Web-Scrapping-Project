@@ -11,6 +11,7 @@ headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, l
 app=Flask(__name__)
 @app.route("/")
 def index():
+ #database'e kayıtlı sayfalar buradan gözükecek
  return render_template("anasayfa.html")
 
 @app.route("/sonuclar", methods=["GET","POST"])
