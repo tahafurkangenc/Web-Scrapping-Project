@@ -1,1 +1,1 @@
-print
+makale_site_URL

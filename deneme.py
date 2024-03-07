@@ -39,6 +39,9 @@ def index():
     if str(tr.find("th").text).strip() == "Yayımlanma Tarihi":
      makale_data["makale_tarih"]=str(tr.find("td").text).strip()
      break
+   
+   
+
    print("Makale ID : "+str(makale_data["makale_ID"]))
    print("Makale isim : "+makale_data["makale_isim"])
    print("Makale Site : "+makale_data["makale_site_URL"])
@@ -73,4 +76,4 @@ def index():
  #return str(soup_res)
 if __name__=="__main__":
  app.run(debug=True)
-#4 mart 6:49
+#6 mart 9:15
