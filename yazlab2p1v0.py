@@ -45,4 +45,4 @@ def sonuc():
  #return str(soup_res)
 if __name__=="__main__":
  app.run(debug=True)
- #4 mart 6:49
+ #6 mart 9:15
