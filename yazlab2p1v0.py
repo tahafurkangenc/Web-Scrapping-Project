@@ -7,7 +7,7 @@ import pymongo
 from pymongo import MongoClient
 URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' 
 headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 OPR/107.0.0.0"}
-connect=MongoClient("mongodb+srv://tahafurkangenc:furkan254@cluster0.ljiblgx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+connect=MongoClient("mongodb://localhost:27017")
 database=connect["yazlab2p1db"]
 collection=database["makale_database"] 
 #response = requests.get(URL)
@@ -18,7 +18,8 @@ app=Flask(__name__)
 @app.route("/")
 def index():
  #database'e kayıtlı sayfalar buradan gözükecek
- return render_template("anasayfa.html")
+ makale_db=collection.find()
+ return render_template("anasayfa.html",makale_datas=makale_db)
 
 @app.route("/sonuclar", methods=["GET","POST"])
 def sonuc(): 
@@ -67,19 +68,24 @@ def sonuc():
      makale_data["makale_tarih"]=str(tr.find("td").text).strip()
      break
 
-   #makaleye ID atanması
-   test_ID=0
-   while True:
-    if collection.find_one({"makale_ID":test_ID}) == None:
-     makale_data["makale_ID"]=test_ID
-     break
-    else:
-     test_ID=test_ID+1
-
+   if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}) !=None: # database_de kayıtlı ise
+    makale_data["makale_ID"]=collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}).get("makale_ID",None)
+    print("makale database'de kayıtlı")
+   else:
+    #makaleye ID atanması
+    test_ID=0
+    while True:
+     if collection.find_one({"makale_ID":test_ID}) == None:
+      makale_data["makale_ID"]=test_ID
+      break
+     else:
+      test_ID=test_ID+1
+  
    print("Makale ID : "+str(makale_data["makale_ID"]))
    print("Makale isim : "+makale_data["makale_isim"])
    print("Makale Site : "+makale_data["makale_site_URL"])
    print("Makale PDF URL : "+makale_data["PDF_URL"])
+   
    print("Makale Yazar : "+makale_data["makale_yazar"])
    print("Makale Tur : "+makale_data["makale_tur"])
    print("Makale Yayimlanma Tarihi : "+makale_data["makale_tarih"])
@@ -108,6 +114,8 @@ def sonuc():
    print(collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"PDF_URL":1 , "_id":0}))
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"PDF_URL":1 , "_id":0}) !=None:
     print("aynisi var")
+    deneme=collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}).get("makale_ID",None)
+    print("       deneme : "+str(deneme))
    else:
     print("veri tabaninda kayitli degil")
     collection.insert_one(makale_data)
@@ -127,4 +135,4 @@ def sonuc():
  #return str(soup_res)
 if __name__=="__main__":
  app.run(debug=True)
- #6 mart 21:46
+ #9 mart 5:14
