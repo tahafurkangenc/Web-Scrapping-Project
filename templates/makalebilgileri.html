@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- Kullanıcının girdiği metni göstermek için bir kutu -->
+    <div id="resultBox"></div>
+    <ul>
+    <li> Makale ID: {{makale_data_JSON.get("makale_ID")}} </li>
+    <li> Makale İsim: {{makale_data_JSON.get("makale_isim")}} </li>
+    <li> Makale Site URL: {{makale_data_JSON.get("makale_site_URL")}} </li>
+    <li> Makale PDF URL : {{makale_data_JSON.get("PDF_URL")}} </li>
+    <li> Makale Yazar: {{makale_data_JSON.get("makale_yazar")}} </li>
+    <li> Makale Türü: {{makale_data_JSON.get("makale_tur")}} </li>
+    <li> Makale Yayimlanma Tarihi: {{makale_data_JSON.get("makale_tarih")}} </li>
+    <li> Makale Ozet: {{makale_data_JSON.get("makale_ozet")}} </li>
+    <li> Makale Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler")}} </li>
+    <li> Makale Tarayıcı Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler_tarayici")}} </li>
+    <li> Makale Yayıncı Adı: {{makale_data_JSON.get("makale_yayinciadi")}} </li>
+    <li> Makale Alıntı Sayısı: {{makale_data_JSON.get("makale_alintisayisi")}} </li>
+      <ul>
+      {% for makale_ref in makale_data_JSON.get('makale_referanslar')%}
+      <li> Makale Referans {{makale_data_JSON.get('makale_referanslar').index(makale_ref)+1}} : {{makale_ref}}</li>
+      {%endfor%}
+      </ul>
+    </ul>
+    
+    <script>
+ 
+    </script>
+</body>
+</html>
+<!--6 mart 21:47-->

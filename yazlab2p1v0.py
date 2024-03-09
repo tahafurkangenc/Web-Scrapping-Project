@@ -133,6 +133,11 @@ def sonuc():
  #return str(icerik)
  return render_template("anasayfa.html",makale_datas=makale_datas)
  #return str(soup_res)
+
+@app.route("/sonuclar/<int:makale_ID>")
+def sonuc_page(makale_ID):
+ return render_template("makalebilgileri.html",makale_data_JSON=collection.find_one({"makale_ID":makale_ID}))
+
 if __name__=="__main__":
  app.run(debug=True)
  #9 mart 5:14

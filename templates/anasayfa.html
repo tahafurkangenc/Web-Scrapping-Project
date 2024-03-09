@@ -19,7 +19,10 @@
     <div id="resultBox"></div>
     <ul>
     {% for makale_data in makale_datas %}
-    <li> <a href = "{{makale_data['makale_site_URL']}}"> {{makale_data["makale_isim"]}} </a></li>
+    <li> 
+       <!--<a href = "{{makale_data['makale_site_URL']}}"> {{makale_data["makale_isim"]}} </a>-->
+       <a href = "/sonuclar/{{makale_data['makale_ID']}}"> {{makale_data["makale_isim"]}} </a>
+    </li>
     {%endfor%}
     </ul>
     
