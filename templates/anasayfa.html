@@ -9,26 +9,122 @@
   <form action="/sonuclar" method="post" id="myForm">
         <!-- Kullanıcıdan metin girişi almak için input kutusu -->
         <label for="inputText">Metin Girişi:</label>
-        <input type="text" id="inputText" name="inputText" required>
+        <input type="text" id="inputText" name="inputText" >
 
         <!-- Formu göndermek için bir buton -->
         <button type="submit">Gönder</button>
     </form>
-    <h1>{{sonuctext}}</h1>
-    <!-- Kullanıcının girdiği metni göstermek için bir kutu -->
-    <div id="resultBox"></div>
-    <ul>
-    {% for makale_data in makale_datas %}
-    <li> 
-       <!--<a href = "{{makale_data['makale_site_URL']}}"> {{makale_data["makale_isim"]}} </a>-->
-       <a href = "/sonuclar/{{makale_data['makale_ID']}}"> {{makale_data["makale_isim"]}} </a>
-    </li>
-    {%endfor%}
-    </ul>
+    <h2>Filtreleme : </h2>
     
+    <form action="/listeleme" method="post" id="myForm2">
+    <!-- İlk Satır -->
+    <div>
+        <label for="minNumber">ID (En Az):</label>
+        <input type="number" id="minNumber" name="minNumber" >
+
+        <label for="maxNumber">ID (En Çok):</label>
+        <input type="number" id="maxNumber" name="maxNumber" >
+    </div>
+
+    <!-- İkinci Satır -->
+    <div>
+        <label for="dateInput">Tarih (En Eski):</label>
+        <input type="date" id="dateInput" name="dateInput" >
+        
+        <label for="dateInput2">Tarih (2. Giriş):</label>
+        <input type="date" id="dateInput2" name="dateInput2" >
+    </div>
+
+    <!-- Üçüncü Satır -->
+    <div>
+        <label for="minNumber2">Alıntı Sayısı (En Az):</label>
+        <input type="number" id="minNumber2" name="minNumber2" >
+
+        <label for="maxNumber2">Alıntı Sayısı (En Çok):</label>
+        <input type="number" id="maxNumber2" name="maxNumber2" >
+    </div>
+
+    <label for="sortField">Sıralama Alanı:</label>
+        <select id="sortField" name="sortField">
+            <option value="makale_ID">ID</option>
+            <option value="makale_isim">İsim</option>
+            <option value="makale_alintisayisi">Alıntı Sayısı</option>
+            <option value="makale_tarih">Tarih</option>
+        </select>
+
+        <label for="sortOrder">Sıralama Yönü:</label>
+        <select id="sortOrder" name="sortOrder">
+            <option value=1>Azdan Çoğa</option>
+            <option value=-1>Çoktan Aza</option>
+        </select>
+    
+    <table>
+    <tr>
+        <td>
+            <label for="isimFilterInput">İsim İle Filtreleme:</label>
+            <input type="text" id="isimFilterInput" name="isimFilterInput">
+        </td>
+        
+        <td>
+            <label for="ozetFilterInput">Özet İle Filtreleme:</label>
+            <input type="text" id="ozetFilterInput" name="ozetFilterInput">
+        </td>
+        
+        <td>
+            <label for="yazarFilterInput">Yazar İle Filtreleme:</label>
+            <input type="text" id="yazarFilterInput" name="yazarFilterInput">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <label for="turFilterInput">Tür İle Filtreleme:</label>
+            <input type="text" id="turFilterInput" name="turFilterInput">
+        </td>
+        
+        <td>
+            <label for="anahtarKelimeInput">Anahtar Kelimeler İle Filtreleme:</label>
+            <input type="text" id="anahtarKelimeInput" name="anahtarKelimeInput">
+        </td>
+        
+        <!-- Eğer gerekirse, 3. sütunun içeriğini buraya ekleyebilirsiniz. -->
+    </tr>
+    </table>
+    
+    <button type="submit">Gönder</button>
+   </form>
+
+   
+    
+    <h1>Makale Tablosu</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>İsim</th>
+            <th>Alıntı Sayısı</th>
+            <th>Tarih</th>
+        </tr>
+        {% for makale_data in makale_datas %}
+         <tr> 
+           <td>{{makale_data["makale_ID"]}}</td>
+           <td><a href = "/sonuclar/{{makale_data['makale_ID']}}"> {{makale_data["makale_isim"]}} </a></td>
+           <td>{{makale_data["makale_alintisayisi"]}}</td>
+           <td>{{makale_data["makale_tarih"]}}</td>
+         </tr>
+        {%endfor%}
+    </table>
     <script>
  
     </script>
 </body>
 </html>
-<!--6 mart 21:47-->
+ <!--<h2>Sonuclar : </h2>
+    <div id="resultBox"></div>
+    <ul>
+    {% for makale_data in makale_datas %}
+    <li> 
+       <a href = "/sonuclar/{{makale_data['makale_ID']}}"> {{makale_data["makale_isim"]}} </a>
+    </li>
+    {%endfor%}
+    </ul>-->
+<!--11 mart 2:45-->

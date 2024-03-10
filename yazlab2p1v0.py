@@ -5,6 +5,7 @@ import random
 from bs4 import BeautifulSoup
 import pymongo
 from pymongo import MongoClient
+from datetime import datetime
 URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' 
 headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 OPR/107.0.0.0"}
 connect=MongoClient("mongodb://localhost:27017")
@@ -14,6 +15,40 @@ collection=database["makale_database"]
 #html_content = response.content
 #soup_res=BeautifulSoup(html_content,"lxml")
 #print(soup_res)
+
+def turkce_tarih_to_datetime(turkce_tarih):
+    turkce_aylar = {
+        'ocak': 'January',
+        'şubat': 'February',
+        'mart': 'March',
+        'nisan': 'April',
+        'mayıs': 'May',
+        'haziran': 'June',
+        'temmuz': 'July',
+        'ağustos': 'August',
+        'eylül': 'September',
+        'ekim': 'October',
+        'kasım': 'November',
+        'aralık': 'December'
+    }
+
+    # Türkçe tarihi boşluklara göre ayır
+    parcalar = turkce_tarih.split()
+
+    # Ay adını İngilizce'ye çevir
+    parcalar[1] = turkce_aylar.get(parcalar[1].lower())
+
+    # İngilizce tarihe çevir
+    ingilizce_tarih = ' '.join(parcalar)
+    
+    # Tarihi çözümle
+    try:
+        datetime_obj = datetime.strptime(ingilizce_tarih, '%d %B %Y')
+        return datetime_obj
+    except ValueError:
+        print("Geçersiz tarih formatı!")
+        return None
+
 app=Flask(__name__)
 @app.route("/")
 def index():
@@ -65,7 +100,7 @@ def sonuc():
    for tr in makale_icerik.find("table",class_='record_properties table').find_all("tr"):
     #print("tr.th -> "+ str(tr.find("th").text)+" ~~ tr.td -> "+ str(tr.find("td").text))
     if str(tr.find("th").text).strip() == "Yayımlanma Tarihi":
-     makale_data["makale_tarih"]=str(tr.find("td").text).strip()
+     makale_data["makale_tarih"]=turkce_tarih_to_datetime(str(tr.find("td").text).strip())
      break
 
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}) !=None: # database_de kayıtlı ise
@@ -88,7 +123,7 @@ def sonuc():
    
    print("Makale Yazar : "+makale_data["makale_yazar"])
    print("Makale Tur : "+makale_data["makale_tur"])
-   print("Makale Yayimlanma Tarihi : "+makale_data["makale_tarih"])
+   print("Makale Yayimlanma Tarihi : "+str(makale_data["makale_tarih"]))
    print("Makale Ozet : "+makale_data["makale_ozet"])
    print("Makale Anahtar Kelimeler : "+str(makale_data["makale_anahtarkelimeler"]))
    print("Makale Tarayici Anahtar Kelimeler : "+ makale_data["makale_anahtarkelimeler_tarayici"])
@@ -138,6 +173,109 @@ def sonuc():
 def sonuc_page(makale_ID):
  return render_template("makalebilgileri.html",makale_data_JSON=collection.find_one({"makale_ID":makale_ID}))
 
+@app.route("/listeleme", methods=["GET","POST"])
+def listeleme():
+ minIDNumber = request.form['minNumber']
+ maxIDNumber = request.form['maxNumber']
+ dateInput = request.form['dateInput']
+ dateInput2 = request.form['dateInput2']
+ minAlintiNumber = request.form['minNumber2']
+ maxAlintiNumber = request.form['maxNumber2']
+ sortField = request.form['sortField']
+ sortOrder = request.form['sortOrder']
+ isim_filter = request.form.get('isimFilterInput')
+ ozet_filter = request.form.get('ozetFilterInput')
+ yazar_filter = request.form.get('yazarFilterInput')
+ tur_filter = request.form.get('turFilterInput')
+ anahtar_kelime_filter = request.form.get('anahtarKelimeInput')
+
+ # Formdan alınan bilgileri konsola bastırma
+ print(f"En Küçük Sayı: {minIDNumber}")
+ print(f"En Büyük Sayı: {maxIDNumber}")
+ print(f"Tarih: {dateInput}")
+ print(f"Tarih (2. Giriş): {dateInput2}")
+ print(f"En Küçük Sayı (2. Giriş): {minAlintiNumber}")
+ print(f"En Büyük Sayı (2. Giriş): {maxAlintiNumber}")
+ print(f"Sıralama Alanı: {sortField}")
+ print(f"Sıralama Yönü: {sortOrder}")
+ # Alınan değerleri kullanarak işlemleri gerçekleştir
+ # Burada sadece değerleri ekrana bastırıyoruz
+ print("İsim Filtre: "+ isim_filter)
+ print("Özet Filtre: "+ ozet_filter)
+ print("Yazar Filtre: "+ yazar_filter)
+ print("Tür Filtre: "+ tur_filter)
+ print("Anahtar Kelime Filtre: " +anahtar_kelime_filter)
+ 
+ database_sorgusu={}
+ if minIDNumber != "" or maxIDNumber !="":
+  print("deger girilmiş")
+  database_sorgusu["makale_ID"]={}
+  if minIDNumber !="":
+   database_sorgusu["makale_ID"]["$gte"]=int(minIDNumber)
+  if maxIDNumber !="":
+   database_sorgusu["makale_ID"]["$lte"]=int(maxIDNumber)
+ else:
+  print("girilen deger yok")
+ 
+ if minAlintiNumber != "" or maxAlintiNumber !="":
+  print("deger girilmiş")
+  database_sorgusu["makale_alintisayisi"]={}
+  if minAlintiNumber !="":
+   database_sorgusu["makale_alintisayisi"]["$gte"]=int(minAlintiNumber)
+  if maxAlintiNumber !="":
+   database_sorgusu["makale_alintisayisi"]["$lte"]=int(maxAlintiNumber)
+ else:
+  print("girilen deger yok")
+
+ if dateInput != "" or dateInput2 !="":
+  print("deger girilmiş")
+  database_sorgusu["makale_tarih"]={}
+  if dateInput !="":
+   database_sorgusu["makale_tarih"]["$gte"]=datetime.strptime(dateInput, '%Y-%m-%d')
+  if dateInput2 !="":
+   database_sorgusu["makale_tarih"]["$lte"]=datetime.strptime(dateInput2, '%Y-%m-%d')
+ else:
+  print("girilen tarih degeri yok") 
+
+ if isim_filter !="":
+  print("makale_isim deger girilmis")
+  database_sorgusu["makale_isim"]={}
+  database_sorgusu["makale_isim"]["$regex"]=isim_filter
+  database_sorgusu["makale_isim"]["$options"]="i"
+ 
+ if ozet_filter !="":
+  print("makale_ozet deger girilmis")
+  database_sorgusu["makale_ozet"]={}
+  database_sorgusu["makale_ozet"]["$regex"]=ozet_filter
+  database_sorgusu["makale_ozet"]["$options"]="i"
+
+ if yazar_filter !="":
+  print("makale_yazar deger girilmis")
+  database_sorgusu["makale_yazar"]={}
+  database_sorgusu["makale_yazar"]["$regex"]=yazar_filter
+  database_sorgusu["makale_yazar"]["$options"]="i"
+
+ if tur_filter !="":
+  print("makale_tur deger girilmis")
+  database_sorgusu["makale_tur"]=tur_filter
+  if "~" in tur_filter:
+   tur_filter=tur_filter.replace("~","")
+   database_sorgusu["makale_tur"]={}
+   database_sorgusu["makale_tur"]["$regex"]=tur_filter
+   database_sorgusu["makale_tur"]["$options"]="i"
+
+ if anahtar_kelime_filter !="":
+  print("makale_anahtarkelimeler deger girilmis")
+  database_sorgusu["makale_anahtarkelimeler"]={}
+  database_sorgusu["makale_anahtarkelimeler"]["$regex"]=anahtar_kelime_filter
+  database_sorgusu["makale_anahtarkelimeler"]["$options"]="i"
+
+ print(database_sorgusu)
+ for i in collection.find(database_sorgusu).sort(sortField,int(sortOrder)):
+    print("ID : "+str(i.get("makale_ID")))
+    print("Alinti Sayisi : "+ str(i.get("makale_alintisayisi")))
+
+ return render_template("anasayfa.html",makale_datas=collection.find(database_sorgusu).sort(sortField,int(sortOrder)))
 if __name__=="__main__":
  app.run(debug=True)
- #9 mart 5:14
+ #11 mart 2:45
