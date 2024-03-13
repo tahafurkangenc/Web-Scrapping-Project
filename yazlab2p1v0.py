@@ -66,9 +66,12 @@ def sonuc():
  # Child ayırmaya çalışacağım
  #print(icerik.find(id='gs_bdy'))
  sayfa = requests.get(URL)
- icerik = BeautifulSoup(sayfa.content,'lxml')   
- alt_divler=icerik.find(class_='article-cards').find_all("div",class_='card article-card dp-card-outline')
- print(len(alt_divler))
+ icerik = BeautifulSoup(sayfa.content,'lxml')
+ try:   
+  alt_divler=icerik.find(class_='article-cards').find_all("div",class_='card article-card dp-card-outline')
+  print(len(alt_divler))
+ except Exception as e:
+  alt_divler=[]
  makale_datas=[]
  i=0
  for alt_div in alt_divler:
@@ -78,30 +81,75 @@ def sonuc():
    makale_data["makale_isim"]=str(alt_div.find("a").text).strip()
    makale_data["makale_site_URL"]=alt_div.find("a")["href"]
    makale_icerik=BeautifulSoup(requests.get(makale_data["makale_site_URL"]).content,'lxml')
-   makale_data['PDF_URL']="https://dergipark.org.tr"+makale_icerik.find(id='article-toolbar').find("a",title="Makale PDF linki")["href"]
-   makale_data['makale_yazar']=str(makale_icerik.find("p",class_='article-authors').text).replace("\n","").replace("  ","").strip() #tam bitmedi
-   makale_data['makale_tur']=str(makale_icerik.find("div",id='article-main-portlet').find("div",class_='kt-portlet__head kt-portlet__head--lg').find("div",class_='kt-portlet__head-title').text).strip()
-   makale_data["makale_ozet"]=str(makale_icerik.find("div",id="article_tr").find("div",class_="article-abstract data-section").text).replace("\nÖz\n","").replace("\n"," ")
+   
+   try:
+    makale_data['PDF_URL']="https://dergipark.org.tr"+makale_icerik.find(id='article-toolbar').find("a",title="Makale PDF linki")["href"]
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["PDF_URL"]=""
+
+   try:
+    makale_data['makale_yazar']=str(makale_icerik.find("p",class_='article-authors').text).replace("\n","").replace("  ","").strip() #tam bitmedi
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_yazar"]=""
+  
+   try:
+    makale_data['makale_tur']=str(makale_icerik.find("div",id='article-main-portlet').find("div",class_='kt-portlet__head kt-portlet__head--lg').find("div",class_='kt-portlet__head-title').text).strip()
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_tur"]=""
+
+   try:
+    makale_data["makale_ozet"]=str(makale_icerik.find("div",id="article_tr").find("div",class_="article-abstract data-section").text).replace("\nÖz\n","").replace("\n"," ")
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_ozet"]=""
+   try:
+    makale_data["makale_anahtarkelimeler_tarayici"]=request.form.get("inputText").strip()
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_anahtarkelimeler_tarayici"]=""
+
+
    makale_data["makale_yayinciadi"]="Dergi Park"
-   makale_data["makale_anahtarkelimeler_tarayici"]=request.form.get("inputText").strip()
+   
    makale_data["makale_alintisayisi"]=random.randint(1,50)
+   
    #anahtar kelimelerin eklenmesi
-   makale_data["makale_anahtarkelimeler"]=makale_icerik.find("div",id="article_tr").find("div",class_="article-keywords data-section")
-   if  makale_data["makale_anahtarkelimeler"]!= None :
-    makale_data["makale_anahtarkelimeler"]=str(makale_data["makale_anahtarkelimeler"].text).replace("Anahtar Kelimeler\n","").replace("\n"," ")
-   #makale_data["makale_tarih"]=str(makale_icerik.find("table",class_='record_properties table').find_all("tr"))
+   try:
+    makale_data["makale_anahtarkelimeler"]=makale_icerik.find("div",id="article_tr").find("div",class_="article-keywords data-section")
+    if  makale_data["makale_anahtarkelimeler"]!= None :
+     makale_data["makale_anahtarkelimeler"]=str(makale_data["makale_anahtarkelimeler"].text).replace("Anahtar Kelimeler\n","").replace("\n"," ")
+     #makale_data["makale_tarih"]=str(makale_icerik.find("table",class_='record_properties table').find_all("tr"))
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_anahtarkelimeler"]=""
+
    #referans eklenmesi
    makale_data["makale_referanslar"]=[]
-   if  makale_icerik.find("div",id="article_tr").find("div",class_="article-citations data-section")!= None:
-     for referans_xml in makale_icerik.find("div",id="article_tr").find("div",class_="article-citations data-section").find("ul",class_='fa-ul').find_all("li"):
-      makale_data['makale_referanslar'].append(str(referans_xml.text).strip())
+   try: 
+    if  makale_icerik.find("div",id="article_tr").find("div",class_="article-citations data-section")!= None:
+      for referans_xml in makale_icerik.find("div",id="article_tr").find("div",class_="article-citations data-section").find("ul",class_='fa-ul').find_all("li"):
+       makale_data['makale_referanslar'].append(str(referans_xml.text).strip())
+      makale_data["makale_alintisayisi"]=len(makale_data["makale_referanslar"])
+      print("Alinti Sayisi Güncellendi")
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_referanslar"]=[]
+
    #tarih eklenmesi
    makale_data["makale_tarih"]=""
-   for tr in makale_icerik.find("table",class_='record_properties table').find_all("tr"):
-    #print("tr.th -> "+ str(tr.find("th").text)+" ~~ tr.td -> "+ str(tr.find("td").text))
-    if str(tr.find("th").text).strip() == "Yayımlanma Tarihi":
-     makale_data["makale_tarih"]=turkce_tarih_to_datetime(str(tr.find("td").text).strip())
-     break
+   try:
+    for tr in makale_icerik.find("table",class_='record_properties table').find_all("tr"):
+     #print("tr.th -> "+ str(tr.find("th").text)+" ~~ tr.td -> "+ str(tr.find("td").text))
+     if str(tr.find("th").text).strip() == "Yayımlanma Tarihi":
+      makale_data["makale_tarih"]=turkce_tarih_to_datetime(str(tr.find("td").text).strip())
+      break
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_tarih"]=""
+
 
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}) !=None: # database_de kayıtlı ise
     makale_data["makale_ID"]=collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}).get("makale_ID",None)
@@ -135,6 +183,7 @@ def sonuc():
    print("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*")
    
    #(requests.get(makale_data["PDF_URL"]).content)
+   '''
    dosya_adi = "PDF_number"+str(i)+".pdf"
    kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
 
@@ -146,6 +195,7 @@ def sonuc():
        print(f"{dosya_adi} dosyası indirildi.")
    else:
      print(f"{dosya_adi} dosyası zaten mevcut.")
+    '''
    print(collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"PDF_URL":1 , "_id":0}))
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"PDF_URL":1 , "_id":0}) !=None:
     print("aynisi var")
@@ -278,4 +328,4 @@ def listeleme():
  return render_template("anasayfa.html",makale_datas=collection.find(database_sorgusu).sort(sortField,int(sortOrder)))
 if __name__=="__main__":
  app.run(debug=True)
- #11 mart 2:45
+ #13 mart 13:40
