@@ -4,8 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+    /* Form container */
+      .form-container {
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      
+      /* Form input fields */
+      .form-container input[type="text"],
+      .form-container input[type="number"],
+      .form-container input[type="date"],
+      .form-container select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      
+      /* Form button */
+      .form-container button[type="submit"] {
+        background-color: #4caf50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+      
+      /* Form button hover effect */
+      .form-container button[type="submit"]:hover {
+        background-color: #45a049;
+      }
+      
+      /* Form table */
+      .form-container table {
+        width: 100%;
+        margin-bottom: 15px;
+      }
+      
+      /* Form table cells */
+      .form-container table td {
+        padding: 5px;
+        display: inline-block; /* Elemanların yan yana olmasını sağlar */
+        width: calc(33.33% - 10px); /* Elemanların yatay yer kaplamasını sağlar */
+        box-sizing: border-box;
+        vertical-align: top; /* Dikey hizalamayı sağlar */
+      }
+      
+      /* Form labels */
+      .form-container label {
+        font-weight: bold;
+      }
+      
+      /* Tablo stilini belirleme */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+
+      /* Tablo başlıkları */
+      th {
+        background-color: #f2f2f2;
+        padding: 10px;
+        text-align: left;
+      }
+
+      /* Tablo hücreleri */
+      td {
+        padding: 5px;
+        padding-left:20px;
+        padding-right:20px;
+        border: 1px solid #ddd;
+      }
+      
+      /* Alternatif satır arka planı */
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+      
+      /* Linkleri stilendirme */
+      a {
+        text-decoration: none;
+        color: #0366d6; /* Link rengi */
+      }
+      
+      a:hover {
+        background:#a4f298
+      }
+
+
+    </style>
 </head>
 <body>
+  <div class="form-container">
   <form action="/sonuclar" method="post" id="myForm">
         <!-- Kullanıcıdan metin girişi almak için input kutusu -->
         <label for="inputText">Metin Girişi:</label>
@@ -15,35 +114,35 @@
         <button type="submit">Gönder</button>
     </form>
     <h2>Filtreleme : </h2>
-    
+   
     <form action="/listeleme" method="post" id="myForm2">
     <!-- İlk Satır -->
-    <div>
+    <table>
+    <tr>
+    <td>
         <label for="minNumber">ID (En Az):</label>
         <input type="number" id="minNumber" name="minNumber" >
 
         <label for="maxNumber">ID (En Çok):</label>
         <input type="number" id="maxNumber" name="maxNumber" >
-    </div>
+    </td>
 
     <!-- İkinci Satır -->
-    <div>
+    <td>
         <label for="dateInput">Tarih (En Eski):</label>
         <input type="date" id="dateInput" name="dateInput" >
         
         <label for="dateInput2">Tarih (2. Giriş):</label>
         <input type="date" id="dateInput2" name="dateInput2" >
-    </div>
-
+    </td>
     <!-- Üçüncü Satır -->
-    <div>
+    <td>
         <label for="minNumber2">Alıntı Sayısı (En Az):</label>
         <input type="number" id="minNumber2" name="minNumber2" >
 
         <label for="maxNumber2">Alıntı Sayısı (En Çok):</label>
         <input type="number" id="maxNumber2" name="maxNumber2" >
-    </div>
-
+    </td>
     <label for="sortField">Sıralama Alanı:</label>
         <select id="sortField" name="sortField">
             <option value="makale_ID">ID</option>
@@ -52,12 +151,12 @@
             <option value="makale_tarih">Tarih</option>
         </select>
 
-        <label for="sortOrder">Sıralama Yönü:</label>
+    <label for="sortOrder">Sıralama Yönü:</label>
         <select id="sortOrder" name="sortOrder">
             <option value=1>Azdan Çoğa</option>
             <option value=-1>Çoktan Aza</option>
         </select>
-    
+   </table>
     <table>
     <tr>
         <td>
@@ -96,7 +195,7 @@
     
     <button type="submit">Gönder</button>
    </form>
-
+   </div>
    
     
     <h1>Makale Tablosu</h1>
@@ -132,4 +231,4 @@
     </li>
     {%endfor%}
     </ul>-->
-<!--14 mart 7:00-->
+<!--14 mart 12:00-->
