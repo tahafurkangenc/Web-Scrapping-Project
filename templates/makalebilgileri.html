@@ -12,23 +12,24 @@
     <!-- Kullanıcının girdiği metni göstermek için bir kutu -->
     <div class="container">
     <ul>
-    <li> Makale ID: {{makale_data_JSON.get("makale_ID")}} </li>
-    <li> Makale İsim: {{makale_data_JSON.get("makale_isim")}} </li>
-    <li> Makale Site URL: {{makale_data_JSON.get("makale_site_URL")}} </li>
-    <li> Makale PDF URL : {{makale_data_JSON.get("PDF_URL")}} </li>
-    <li> Makale Yazar: {{makale_data_JSON.get("makale_yazar")}} </li>
-    <li> Makale Türü: {{makale_data_JSON.get("makale_tur")}} </li>
-    <li> Makale Yayimlanma Tarihi: {{makale_data_JSON.get("makale_tarih")}} </li>
-    <li> Makale Ozet: {{makale_data_JSON.get("makale_ozet")}} </li>
-    <li> Makale Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler")}} </li>
-    <li> Makale Tarayıcı Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler_tarayici")}} </li>
-    <li> Makale Yayıncı Adı: {{makale_data_JSON.get("makale_yayinciadi")}} </li>
-    <li> Makale Alıntı Sayısı: {{makale_data_JSON.get("makale_alintisayisi")}} </li>
-      <ul>
-      {% for makale_ref in makale_data_JSON.get('makale_referanslar')%}
-      <li> Makale Referans {{makale_data_JSON.get('makale_referanslar').index(makale_ref)+1}} : {{makale_ref}}</li>
-      {%endfor%}
-      </ul>
+     <li> Makale ID: {{makale_data_JSON.get("makale_ID")}} </li>
+     <li> Makale İsim: {{makale_data_JSON.get("makale_isim")}} </li>
+     <li> Makale Site URL: {{makale_data_JSON.get("makale_site_URL")}} </li>
+     <li> Makale PDF URL : {{makale_data_JSON.get("PDF_URL")}} </li>
+     <li> Makale Yazar: {{makale_data_JSON.get("makale_yazar")}} </li>
+     <li> Makale Türü: {{makale_data_JSON.get("makale_tur")}} </li>
+     <li> Makale Yayimlanma Tarihi: {{makale_data_JSON.get("makale_tarih")}} </li>
+     <li> Makale Ozet: {{makale_data_JSON.get("makale_ozet")}} </li>
+     <li> Makale Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler")}} </li>
+     <li> Makale Tarayıcı Anahtar Kelimeler: {{makale_data_JSON.get("makale_anahtarkelimeler_tarayici")}} </li>
+     <li> Makale Yayıncı Adı: {{makale_data_JSON.get("makale_yayinciadi")}} </li>
+     <li> Makale Alıntı Sayısı: {{makale_data_JSON.get("makale_alintisayisi")}} </li>
+       <ul>
+       {% for makale_ref in makale_data_JSON.get('makale_referanslar')%}
+       <li> Makale Referans {{makale_data_JSON.get('makale_referanslar').index(makale_ref)+1}} : {{makale_ref}}</li>
+       {%endfor%}
+       </ul>
+      <li><a href = "/download/{{makale_data_JSON.get('makale_ID')}}"> makaleyi indir </a></li>
     </ul>
     </div>
     <script>
@@ -36,4 +37,4 @@
     </script>
 </body>
 </html>
-<!--11 mart 2:45-->
+<!--14 mart 7:00-->

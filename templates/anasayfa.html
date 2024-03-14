@@ -87,7 +87,10 @@
             <input type="text" id="anahtarKelimeInput" name="anahtarKelimeInput">
         </td>
         
-        <!-- Eğer gerekirse, 3. sütunun içeriğini buraya ekleyebilirsiniz. -->
+        <td>
+            <label for="aramaKelimeInput">Arama Kelimeleri İle Filtreleme:</label>
+            <input type="text" id="aramaKelimeInput" name="aramaKelimeInput">
+        </td>
     </tr>
     </table>
     
@@ -103,6 +106,7 @@
             <th>İsim</th>
             <th>Alıntı Sayısı</th>
             <th>Tarih</th>
+            <th>İndir</th>
         </tr>
         {% for makale_data in makale_datas %}
          <tr> 
@@ -110,6 +114,7 @@
            <td><a href = "/sonuclar/{{makale_data['makale_ID']}}"> {{makale_data["makale_isim"]}} </a></td>
            <td>{{makale_data["makale_alintisayisi"]}}</td>
            <td>{{makale_data["makale_tarih"]}}</td>
+           <td><a href = "/download/{{makale_data['makale_ID']}}"> makaleyi indir </a></td>
          </tr>
         {%endfor%}
     </table>
@@ -127,4 +132,4 @@
     </li>
     {%endfor%}
     </ul>-->
-<!--11 mart 2:45-->
+<!--14 mart 7:00-->

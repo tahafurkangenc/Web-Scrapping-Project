@@ -238,6 +238,7 @@ def listeleme():
  yazar_filter = request.form.get('yazarFilterInput')
  tur_filter = request.form.get('turFilterInput')
  anahtar_kelime_filter = request.form.get('anahtarKelimeInput')
+ arama_kelime_filter= request.form.get('aramaKelimeInput')
 
  # Formdan alınan bilgileri konsola bastırma
  print(f"En Küçük Sayı: {minIDNumber}")
@@ -255,7 +256,7 @@ def listeleme():
  print("Yazar Filtre: "+ yazar_filter)
  print("Tür Filtre: "+ tur_filter)
  print("Anahtar Kelime Filtre: " +anahtar_kelime_filter)
- 
+ print("Arama Kelime Filtre: " +anahtar_kelime_filter)
  database_sorgusu={}
  if minIDNumber != "" or maxIDNumber !="":
   print("deger girilmiş")
@@ -320,12 +321,47 @@ def listeleme():
   database_sorgusu["makale_anahtarkelimeler"]["$regex"]=anahtar_kelime_filter
   database_sorgusu["makale_anahtarkelimeler"]["$options"]="i"
 
+ if arama_kelime_filter !="":
+  print("makale_anahtarkelimeler_tarayici deger girilmis")
+  database_sorgusu["makale_anahtarkelimeler_tarayici"]={}
+  database_sorgusu["makale_anahtarkelimeler_tarayici"]["$regex"]=arama_kelime_filter
+  database_sorgusu["makale_anahtarkelimeler_tarayici"]["$options"]="i"
  print(database_sorgusu)
+ '''
  for i in collection.find(database_sorgusu).sort(sortField,int(sortOrder)):
     print("ID : "+str(i.get("makale_ID")))
     print("Alinti Sayisi : "+ str(i.get("makale_alintisayisi")))
-
+ '''
+    
  return render_template("anasayfa.html",makale_datas=collection.find(database_sorgusu).sort(sortField,int(sortOrder)))
+
+@app.route("/download/<int:makale_ID_download>")
+def downloadwithID(makale_ID_download):
+ dosya_JSON = collection.find_one({"makale_ID": makale_ID_download})
+ try:
+  dosya_adi = dosya_JSON.get("makale_isim")+".pdf"
+  kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
+  if not os.path.exists(kaydetme_yolu):
+    response = requests.get(dosya_JSON.get("PDF_URL"))
+    with open(kaydetme_yolu, "wb") as f:
+      f.write(response.content)
+      print(f"{dosya_adi} dosyası indirildi.")
+  else:
+    print(f"{dosya_adi} dosyası zaten mevcut.")
+ except Exception as e:
+  print("Dosya adi sorunu ->"+str(e))
+  dosya_adi = "MAKALE_ID_"+str(dosya_JSON.get("makale_ID"))+".pdf"
+  kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
+  if not os.path.exists(kaydetme_yolu):
+    response = requests.get(dosya_JSON.get("PDF_URL"))
+    with open(kaydetme_yolu, "wb") as f:
+      f.write(response.content)
+      print(f"{dosya_adi} dosyası indirildi.")
+  else:
+    print(f"{dosya_adi} dosyası zaten mevcut.")
+
+ return render_template("anasayfa.html")
+
 if __name__=="__main__":
  app.run(debug=True)
- #13 mart 13:40
+ #14 mart 7:00
