@@ -51,6 +51,7 @@
      <li> <strong>Makale Tarayıcı Anahtar Kelimeler:</strong> {{makale_data_JSON.get("makale_anahtarkelimeler_tarayici")}} </li>
      <li> <strong>Makale Yayıncı Adı:</strong> {{makale_data_JSON.get("makale_yayinciadi")}} </li>
      <li> <strong>Makale Alıntı Sayısı:</strong> {{makale_data_JSON.get("makale_alintisayisi")}} </li>
+     <li> <strong>Makale DOI:</strong> {{makale_data_JSON.get("makale_doi")}} </li>
        <ul>
        {% for makale_ref in makale_data_JSON.get('makale_referanslar')%}
        <li class="Referans"> <strong> Makale Referans {{makale_data_JSON.get('makale_referanslar').index(makale_ref)+1}} </strong>: {{makale_ref}}</li>
@@ -64,4 +65,4 @@
     </script>
 </body>
 </html>
-<!--14 mart 12:00-->
+<!--16 mart 17:30-->

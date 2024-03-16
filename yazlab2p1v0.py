@@ -6,11 +6,11 @@ from bs4 import BeautifulSoup
 import pymongo
 from pymongo import MongoClient
 from datetime import datetime
-URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' 
+URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' #default url belirliyoruz
 headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 OPR/107.0.0.0"}
 connect=MongoClient("mongodb://localhost:27017")
-database=connect["yazlab2p1db"]
-collection=database["makale_database"] 
+database=connect["yazlab2p1db"] #database ismi
+collection=database["makale_database"] #database dosyamız
 #response = requests.get(URL)
 #html_content = response.content
 #soup_res=BeautifulSoup(html_content,"lxml")
@@ -50,37 +50,38 @@ def turkce_tarih_to_datetime(turkce_tarih):
         return None
 
 app=Flask(__name__)
-@app.route("/")
+@app.route("/") #localhost linki çalıştığında çalışacak method
 def index():
  #database'e kayıtlı sayfalar buradan gözükecek
  makale_db=collection.find()
- return render_template("anasayfa.html",makale_datas=makale_db)
+ return render_template("anasayfa.html",makale_datas=makale_db) #anasayfaya db yi gönderiyor
 
-@app.route("/sonuclar", methods=["GET","POST"])
+@app.route("/sonuclar", methods=["GET","POST"]) #sonuç sayfası gösteren url girdi alıyor
 def sonuc(): 
  #return "deneme"
  #print(str(icerik.find(id='gs_res_ccl_mid')))
- if request.method == "POST":
+ if request.method == "POST": #Yeni URL oluşturuyoruz
   print("SONUC-> https://dergipark.org.tr/tr/search?q="+request.form.get("inputText").strip().replace(' ','+')+"&section=articles")
-  URL="https://dergipark.org.tr/tr/search?q="+request.form.get("inputText").strip().replace(' ','+')+"&section=articles"
- # Child ayırmaya çalışacağım
- #print(icerik.find(id='gs_bdy'))
+  URL="https://dergipark.org.tr/tr/search?q="+request.form.get("inputText").strip().replace(' ','+')+"&section=articles" 
+ 
  sayfa = requests.get(URL)
  icerik = BeautifulSoup(sayfa.content,'lxml')
+ #arama sayfasındaki tüm makalelerin linklerini alacağımız div'leri alıyoruz
  try:   
   alt_divler=icerik.find(class_='article-cards').find_all("div",class_='card article-card dp-card-outline')
   print(len(alt_divler))
  except Exception as e:
   alt_divler=[]
- makale_datas=[]
- i=0
+
+ makale_datas=[] # tüm makalelerin datalarının saklandığı değişken (Çok da gerek yoktu)
+ i=0 # 10 makale kısıtı yapmak için
  for alt_div in alt_divler:
    #print(str(alt_div.find("a").text).strip())
    #print(alt_div.find("a")["href"])
-   makale_data={}
+   makale_data={} # her makalenin datası burada hashmap ile tutulacak
    makale_data["makale_isim"]=str(alt_div.find("a").text).strip()
    makale_data["makale_site_URL"]=alt_div.find("a")["href"]
-   makale_icerik=BeautifulSoup(requests.get(makale_data["makale_site_URL"]).content,'lxml')
+   makale_icerik=BeautifulSoup(requests.get(makale_data["makale_site_URL"]).content,'lxml') #ikinci sayfa olan makale sayfalarına geçiş yapıyoruz
    
    try:
     makale_data['PDF_URL']="https://dergipark.org.tr"+makale_icerik.find(id='article-toolbar').find("a",title="Makale PDF linki")["href"]
@@ -105,6 +106,7 @@ def sonuc():
    except Exception as e:
     print("Hata : " + str(e))
     makale_data["makale_ozet"]=""
+   
    try:
     makale_data["makale_anahtarkelimeler_tarayici"]=request.form.get("inputText").strip()
    except Exception as e:
@@ -114,9 +116,9 @@ def sonuc():
 
    makale_data["makale_yayinciadi"]="Dergi Park"
    
-   makale_data["makale_alintisayisi"]=random.randint(1,50)
+   makale_data["makale_alintisayisi"]=random.randint(1,50) # default olarak random değer atıyoruz
    
-   #anahtar kelimelerin eklenmesi
+   #anahtar kelimelerin eklenmesinde bir if kontrolü yazdım ama çok da gerek yoktu
    try:
     makale_data["makale_anahtarkelimeler"]=makale_icerik.find("div",id="article_tr").find("div",class_="article-keywords data-section")
     if  makale_data["makale_anahtarkelimeler"]!= None :
@@ -126,7 +128,7 @@ def sonuc():
     print("Hata : " + str(e))
     makale_data["makale_anahtarkelimeler"]=""
 
-   #referans eklenmesi
+   #referans eklenmesinde dizi olduğundan for kullanımı var. alıntı sayısı da burada güncelleniyor
    makale_data["makale_referanslar"]=[]
    try: 
     if  makale_icerik.find("div",id="article_tr").find("div",class_="article-citations data-section")!= None:
@@ -138,7 +140,7 @@ def sonuc():
     print("Hata : " + str(e))
     makale_data["makale_referanslar"]=[]
 
-   #tarih eklenmesi
+   #tarih eklenmesi bir tabloda olduğundan dolayı tabledaki tüm değerleri for ile dönüp string araması ile buluyoruz
    makale_data["makale_tarih"]=""
    try:
     for tr in makale_icerik.find("table",class_='record_properties table').find_all("tr"):
@@ -149,7 +151,13 @@ def sonuc():
    except Exception as e:
     print("Hata : " + str(e))
     makale_data["makale_tarih"]=""
-
+   
+   #doi eklenmesi
+   try:
+    makale_data["makale_doi"]=str(makale_icerik.find("div",id="article_tr").find("div",class_="article-doi data-section").text).replace("\n","")
+   except Exception as e:
+    print("Hata : " + str(e))
+    makale_data["makale_doi"]=""
 
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}) !=None: # database_de kayıtlı ise
     makale_data["makale_ID"]=collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}).get("makale_ID",None)
@@ -157,7 +165,7 @@ def sonuc():
    else:
     #makaleye ID atanması
     test_ID=0
-    while True:
+    while True: # her seferinde 0 dan başlayıp boş olan ID numarası arıyoruz.
      if collection.find_one({"makale_ID":test_ID}) == None:
       makale_data["makale_ID"]=test_ID
       break
@@ -168,7 +176,7 @@ def sonuc():
    print("Makale isim : "+makale_data["makale_isim"])
    print("Makale Site : "+makale_data["makale_site_URL"])
    print("Makale PDF URL : "+makale_data["PDF_URL"])
-   
+   print("Makale DOI : "+makale_data["makale_doi"])
    print("Makale Yazar : "+makale_data["makale_yazar"])
    print("Makale Tur : "+makale_data["makale_tur"])
    print("Makale Yayimlanma Tarihi : "+str(makale_data["makale_tarih"]))
@@ -203,8 +211,8 @@ def sonuc():
     print("       deneme : "+str(deneme))
    else:
     print("veri tabaninda kayitli degil")
-    collection.insert_one(makale_data)
-   makale_datas.append(makale_data)
+    collection.insert_one(makale_data) # veri tabanında baktığımız makale yoksa makaleyi ekliyoruz.
+   makale_datas.append(makale_data) #her halukarda tüm sonuçları makale_datas a ekliyorız
    #if str(alt_div.find("a").find("span").text).strip()=="[PDF]":
     #pdf_links.append(alt_div.find("a")["href"])
 
@@ -214,17 +222,17 @@ def sonuc():
    
  print(len(alt_divler))
 
-  
+ # bütün verileri anasayfa.htmk e yönlendiriyoruz
  #return str(icerik)
  return render_template("anasayfa.html",makale_datas=makale_datas)
  #return str(soup_res)
 
 @app.route("/sonuclar/<int:makale_ID>")
-def sonuc_page(makale_ID):
+def sonuc_page(makale_ID): # bir makalenin sonucunu gösteren html sayfasına veri tabanından veri atıyoruz
  return render_template("makalebilgileri.html",makale_data_JSON=collection.find_one({"makale_ID":makale_ID}))
 
 @app.route("/listeleme", methods=["GET","POST"])
-def listeleme():
+def listeleme(): #filtreleme için aldığımız inputları değişkenlere atıyoruz
  minIDNumber = request.form['minNumber']
  maxIDNumber = request.form['maxNumber']
  dateInput = request.form['dateInput']
@@ -249,7 +257,6 @@ def listeleme():
  print(f"En Büyük Sayı (2. Giriş): {maxAlintiNumber}")
  print(f"Sıralama Alanı: {sortField}")
  print(f"Sıralama Yönü: {sortOrder}")
- # Alınan değerleri kullanarak işlemleri gerçekleştir
  # Burada sadece değerleri ekrana bastırıyoruz
  print("İsim Filtre: "+ isim_filter)
  print("Özet Filtre: "+ ozet_filter)
@@ -257,7 +264,8 @@ def listeleme():
  print("Tür Filtre: "+ tur_filter)
  print("Anahtar Kelime Filtre: " +anahtar_kelime_filter)
  print("Arama Kelime Filtre: " +anahtar_kelime_filter)
- database_sorgusu={}
+ # Alınan değerleri kullanarak işlemleri gerçekleştiriyoruz
+ database_sorgusu={} #JSON tipinde sorgu oluşturuyoruz. Componentte veri varsa bu değişkene ekliyoruz
  if minIDNumber != "" or maxIDNumber !="":
   print("deger girilmiş")
   database_sorgusu["makale_ID"]={}
@@ -332,13 +340,13 @@ def listeleme():
     print("ID : "+str(i.get("makale_ID")))
     print("Alinti Sayisi : "+ str(i.get("makale_alintisayisi")))
  '''
-    
+  # database'de sorguyu atıp sonuçlarını listelemesi için anasayfa.html'e gönderiyoruz  
  return render_template("anasayfa.html",makale_datas=collection.find(database_sorgusu).sort(sortField,int(sortOrder)))
 
 @app.route("/download/<int:makale_ID_download>")
-def downloadwithID(makale_ID_download):
+def downloadwithID(makale_ID_download): #dışarıdan indirme yapmak için ID alıyoruz
  dosya_JSON = collection.find_one({"makale_ID": makale_ID_download})
- try:
+ try: # dosya adında sorun yoksa indirme şekli isim ile olur
   dosya_adi = dosya_JSON.get("makale_isim")+".pdf"
   kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
   if not os.path.exists(kaydetme_yolu):
@@ -348,7 +356,7 @@ def downloadwithID(makale_ID_download):
       print(f"{dosya_adi} dosyası indirildi.")
   else:
     print(f"{dosya_adi} dosyası zaten mevcut.")
- except Exception as e:
+ except Exception as e: # dosya adında sorun varsa indirme işi bu şekilde olur
   print("Dosya adi sorunu ->"+str(e))
   dosya_adi = "MAKALE_ID_"+str(dosya_JSON.get("makale_ID"))+".pdf"
   kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
@@ -364,4 +372,4 @@ def downloadwithID(makale_ID_download):
 
 if __name__=="__main__":
  app.run(debug=True)
- #14 mart 12:00
+ #17 mart 1:00
