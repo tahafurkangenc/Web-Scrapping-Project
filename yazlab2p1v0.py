@@ -86,31 +86,31 @@ def sonuc():
    try:
     makale_data['PDF_URL']="https://dergipark.org.tr"+makale_icerik.find(id='article-toolbar').find("a",title="Makale PDF linki")["href"]
    except Exception as e:
-    print("Hata : " + str(e))
+    print("PDF_URL Hata : " + str(e))
     makale_data["PDF_URL"]=""
 
    try:
     makale_data['makale_yazar']=str(makale_icerik.find("p",class_='article-authors').text).replace("\n","").replace("  ","").strip() #tam bitmedi
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_yazar Hata : " + str(e))
     makale_data["makale_yazar"]=""
   
    try:
     makale_data['makale_tur']=str(makale_icerik.find("div",id='article-main-portlet').find("div",class_='kt-portlet__head kt-portlet__head--lg').find("div",class_='kt-portlet__head-title').text).strip()
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_tur Hata : " + str(e))
     makale_data["makale_tur"]=""
 
    try:
     makale_data["makale_ozet"]=str(makale_icerik.find("div",id="article_tr").find("div",class_="article-abstract data-section").text).replace("\nÖz\n","").replace("\n"," ")
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_ozet Hata : " + str(e))
     makale_data["makale_ozet"]=""
    
    try:
     makale_data["makale_anahtarkelimeler_tarayici"]=request.form.get("inputText").strip()
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_anahtarkelimeler_tarayici Hata : " + str(e))
     makale_data["makale_anahtarkelimeler_tarayici"]=""
 
 
@@ -125,7 +125,7 @@ def sonuc():
      makale_data["makale_anahtarkelimeler"]=str(makale_data["makale_anahtarkelimeler"].text).replace("Anahtar Kelimeler\n","").replace("\n"," ")
      #makale_data["makale_tarih"]=str(makale_icerik.find("table",class_='record_properties table').find_all("tr"))
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_anahtarkelimeler Hata : " + str(e))
     makale_data["makale_anahtarkelimeler"]=""
 
    #referans eklenmesinde dizi olduğundan for kullanımı var. alıntı sayısı da burada güncelleniyor
@@ -137,7 +137,7 @@ def sonuc():
       makale_data["makale_alintisayisi"]=len(makale_data["makale_referanslar"])
       print("Alinti Sayisi Güncellendi")
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_referanslar Hata : " + str(e))
     makale_data["makale_referanslar"]=[]
 
    #tarih eklenmesi bir tabloda olduğundan dolayı tabledaki tüm değerleri for ile dönüp string araması ile buluyoruz
@@ -149,14 +149,14 @@ def sonuc():
       makale_data["makale_tarih"]=turkce_tarih_to_datetime(str(tr.find("td").text).strip())
       break
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_tarih Hata : " + str(e))
     makale_data["makale_tarih"]=""
    
    #doi eklenmesi
    try:
     makale_data["makale_doi"]=str(makale_icerik.find("div",id="article_tr").find("div",class_="article-doi data-section").text).replace("\n","")
    except Exception as e:
-    print("Hata : " + str(e))
+    print("makale_doi Hata : " + str(e))
     makale_data["makale_doi"]=""
 
    if collection.find_one({"PDF_URL":makale_data["PDF_URL"]},{"makale_ID":1 , "_id":0}) !=None: # database_de kayıtlı ise
