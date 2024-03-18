@@ -2,6 +2,7 @@ from flask import Flask , render_template
 import os
 import requests
 from bs4 import BeautifulSoup
+from spellchecker import SpellChecker
 URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' 
 headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 OPR/107.0.0.0"}
 sayfa = requests.get(URL)
@@ -11,11 +12,35 @@ sayfa = requests.get(URL)
 #soup_res=BeautifulSoup(html_content,"lxml")
 #print(soup_res)
 
+def duzeltme(metin):
+ metin=metin.replace("~","")
+  # SpellChecker nesnesi oluşturma
+ spellchecker = SpellChecker()
+  # Hatalı kelimeleri bulma
+  #hatali_kelimeler = spellchecker.unknown(["artifcal","intellicenge"])
+ metin_split=metin.split(" ")
+ print(len(metin_split))
+ if(len(metin_split)==1):
+  print("duzeltilmis hal : "+ str(spellchecker.correction(metin)))
+  return str(spellchecker.correction(metin))
+ else:
+  metin_correction=[]
+  for kelimeler in metin_split:
+   print("kelimeler :"+ kelimeler+"---")
+   print("correction "+ str(spellchecker.correction(kelimeler)))
+   metin_correction.append(spellchecker.correction(kelimeler))
+   print(spellchecker.candidates(kelimeler))
+  print("duzeltilmis hal "+str(" ".join(metin_correction)))
+  return str(" ".join(metin_correction))
+
 icerik = BeautifulSoup(sayfa.content,'lxml')   
 app=Flask(__name__)
 @app.route("/")
 def index():
  #print(str(icerik.find(class_='article-cards')))
+ metin = "~artifcal intellienge"
+ if '~' in metin:
+  return duzeltme(metin)
  alt_divler=icerik.find(class_='article-cards').find_all("div",class_='card article-card dp-card-outline')
  print(len(alt_divler))
  makale_datas=[]

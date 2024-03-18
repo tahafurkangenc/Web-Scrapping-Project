@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 import pymongo
 from pymongo import MongoClient
 from datetime import datetime
+from spellchecker import SpellChecker
 URL='https://dergipark.org.tr/tr/search?q=yapay+zeka&section=articles' #default url belirliyoruz
 headers={"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 OPR/107.0.0.0"}
 connect=MongoClient("mongodb://localhost:27017")
@@ -15,6 +16,30 @@ collection=database["makale_database"] #database dosyamız
 #html_content = response.content
 #soup_res=BeautifulSoup(html_content,"lxml")
 #print(soup_res)
+
+def duzeltme(metin):
+ try:
+  metin=metin.replace("~","")
+   # SpellChecker nesnesi oluşturma
+  spellchecker = SpellChecker()
+   # Hatalı kelimeleri bulma
+   #hatali_kelimeler = spellchecker.unknown(["artifcal","intellicenge"])
+  metin_split=metin.split(" ")
+  print(len(metin_split))
+  if(len(metin_split)==1):
+   print("duzeltilmis hal : "+ str(spellchecker.correction(metin)))
+   return str(spellchecker.correction(metin))
+  else:
+   metin_correction=[]
+   for kelimeler in metin_split:
+    print("correction"+spellchecker.correction(kelimeler))
+    metin_correction.append(spellchecker.correction(kelimeler))
+    print(spellchecker.candidates(kelimeler))
+   print("duzeltilmis hal"+str(" ".join(metin_correction)))
+   return str(" ".join(metin_correction))
+ except Exception as e:
+  print("duzeltme hatasi : "+ str(e))
+  return metin.replace("~","")
 
 def turkce_tarih_to_datetime(turkce_tarih):
     turkce_aylar = {
@@ -61,8 +86,11 @@ def sonuc():
  #return "deneme"
  #print(str(icerik.find(id='gs_res_ccl_mid')))
  if request.method == "POST": #Yeni URL oluşturuyoruz
-  print("SONUC-> https://dergipark.org.tr/tr/search?q="+request.form.get("inputText").strip().replace(' ','+')+"&section=articles")
-  URL="https://dergipark.org.tr/tr/search?q="+request.form.get("inputText").strip().replace(' ','+')+"&section=articles" 
+  arama_string = request.form.get("inputText")
+  if '~' in request.form.get("inputText"):
+    arama_string=duzeltme(str(request.form.get("inputText")).strip())
+  print("SONUC-> https://dergipark.org.tr/tr/search?q="+arama_string.strip().replace(' ','+')+"&section=articles")
+  URL="https://dergipark.org.tr/tr/search?q="+arama_string.strip().replace(' ','+')+"&section=articles" 
  
  sayfa = requests.get(URL)
  icerik = BeautifulSoup(sayfa.content,'lxml')
@@ -171,7 +199,7 @@ def sonuc():
       break
      else:
       test_ID=test_ID+1
-  
+   i=i+1
    print("Makale ID : "+str(makale_data["makale_ID"]))
    print("Makale isim : "+makale_data["makale_isim"])
    print("Makale Site : "+makale_data["makale_site_URL"])
@@ -185,9 +213,9 @@ def sonuc():
    print("Makale Tarayici Anahtar Kelimeler : "+ makale_data["makale_anahtarkelimeler_tarayici"])
    print("Makale Yayinci Adi : "+makale_data['makale_yayinciadi'])
    print("Makale Alinti Sayisi : "+str(makale_data["makale_alintisayisi"]))
-   print("Makale Referanslar :=>")
-   for ref in makale_data["makale_referanslar"]:
-    print("    Referans "+str(makale_data["makale_referanslar"].index(ref))+" : "+ ref)
+   print("Makale Referanslar :=>"+str(len(makale_data["makale_referanslar"])))
+   #for ref in makale_data["makale_referanslar"]:
+    #print("    Referans "+str(makale_data["makale_referanslar"].index(ref))+" : "+ ref)
    print("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*")
    
    #(requests.get(makale_data["PDF_URL"]).content)
@@ -350,6 +378,7 @@ def downloadwithID(makale_ID_download): #dışarıdan indirme yapmak için ID al
   dosya_adi = dosya_JSON.get("makale_isim")+".pdf"
   kaydetme_yolu = os.path.join("C:\\Users\\asus\\Desktop\\PDF ler", dosya_adi)
   if not os.path.exists(kaydetme_yolu):
+    print(dosya_JSON.get("PDF_URL"))
     response = requests.get(dosya_JSON.get("PDF_URL"))
     with open(kaydetme_yolu, "wb") as f:
       f.write(response.content)
@@ -372,4 +401,4 @@ def downloadwithID(makale_ID_download): #dışarıdan indirme yapmak için ID al
 
 if __name__=="__main__":
  app.run(debug=True)
- #17 mart 1:00
+ #18 mart 4:47

@@ -1,1 +1,1 @@
-makale_site_URL
+arama_string
